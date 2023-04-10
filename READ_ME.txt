@@ -1,0 +1,1 @@
+This tkinter application was designed for my personal use. I use it to keep record of the heirarchy of our club "Live Wire Club", to save the details of all the events that have been organised by our club and to plan any upcoming event.
