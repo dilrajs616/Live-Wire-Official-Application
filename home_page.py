@@ -7,7 +7,7 @@ import json
 
 class Home_Page:
     def __init__(self, root):
-        root.title("Live Wire Official Application")
+        root.title("Home Page")
         icon_path = 'images/live_wire_logo.png'
         icon_image = PhotoImage(file=icon_path)
         root.call('wm', 'iconphoto', root._w, icon_image)
@@ -15,22 +15,12 @@ class Home_Page:
         root.resizable(False, False)
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
-        # root.option_add('*tearOff', FALSE)
         self.mainframe = ttk.Frame(root, relief=RAISED)
         self.mainframe.grid(row=0, column=0, sticky=(N, S, E, W))
-        
-        # self.menubar = Menu(root)
-        # root.config(menu=self.menubar)
-        
-        # self.mode_menu = Menu(self.menubar)
-        # self.menubar.add_cascade(label="Mode", menu=self.mode_menu)
-        # self.mode_menu.add_command(label='Sky Theme', command=self.change_theme)
-        
-        # Create an instance of ttk Style
-        self.style = ThemedStyle()
-        # Configure the theme with style
-        # self.style.theme_use("clam")
 
+        self.style = ThemedStyle()
+        self.style.theme_use("clam")
+        
         self.club_logo = PhotoImage(file='images/bigger_club_logo.png')
         self.club_label = Label(self.mainframe, image=self.club_logo, background="#dcdad5")
         self.club_label.grid(row=0, column=0, sticky=N, padx=50, pady=25)
@@ -53,10 +43,6 @@ class Home_Page:
         
         self.use_btn = ttk.Button(self.subframe, text="How to use", command=self.how_to_use, width=15)
         self.use_btn.grid()
-        
-        self.mode_btn = ttk.Button(self.subframe, text="Cream Theme", command=self.change_theme, width=15)
-        self.light_mode = True
-        self.mode_btn.grid()
                 
         self.quit_btn = ttk.Button(self.subframe, text="Quit", command=lambda: root.quit(), width=15)
         self.quit_btn.grid()
@@ -72,6 +58,8 @@ class Home_Page:
         
         for child in self.subframe.winfo_children():
             child.grid_configure(padx=210, pady=10)
+            
+        root.bind('<Return>', self.press_button)
     
     def heirarchy_page(self, *args):
         self.mainframe.grid_remove()
@@ -86,25 +74,16 @@ class Home_Page:
         Images_Page(root)
         
     def how_to_use(self):
-        with open('members/how_to_use.txt') as f:
+        with open('documents/how_to_use.txt') as f:
             content = f.read()
         messagebox.showinfo("How to use", content)
         
-    def change_theme(self):
-        if self.light_mode:
-            self.style.theme_use("itft1")
-            self.mode_btn.configure(text="Sky Theme")
-            self.club_label.configure(background="#daeffd")
-            self.clg_label.configure(background="#daeffd")
-            self.light_mode = False
-        
-        else:
-            self.style.theme_use("clam")
-            self.mode_btn.configure(text="Cream Theme")
-            self.club_label.configure(background="#dcdad5")
-            self.clg_label.configure(background="#dcdad5")
-            self.light_mode = True
-        
+    def press_button(self, event):
+        current_focus = root.focus_get()
+        if isinstance(current_focus, ttk.Button):
+            current_focus.invoke()
+        return 'break'
+    
     def go_back(self, *args):
         self.subframe.grid_remove()
         Home_Page(root)
@@ -116,28 +95,26 @@ class Home_Page:
 class Heirarchy_Page(Home_Page):
     def __init__(self, root):
         super().__init__(root)
-        self.heirarchy_btn.configure(text="Conveners", command=self.show_conveners, width=15)
-        self.events_btn.configure(text="Team Heads", command=self.show_heads, width=15)
-        self.images_btn.configure(text="Active Members", command=self.show_active_members, width=15)
+        root.title("Heirarchy Page")
+        self.heirarchy_btn.configure(text="Teachers", command=self.show_teacher_coordinator, width=15)
+        self.events_btn.configure(text="Conveners", command=self.show_conveners, width=15)
+        self.images_btn.configure(text="Teams", command=self.show_teams, width=15)
         self.edit_btn = ttk.Button(self.subframe, text="Edit", command=self.edit_list, width=15)
         self.edit_btn.grid(pady=10)
         self.go_back_btn = ttk.Button(self.subframe, text = "Back", command = self.go_back, width=15)
         self.go_back_btn.grid(pady=10)
         self.quit_btn.grid_remove()
         self.use_btn.grid_remove()
-        # self.mode_btn.grid_forget()
         self.msg = StringVar()
-    
-    def show_conveners(self):
-        self.clear_scr()
-        convener_list = []
-        with open('members/conveners.json') as f:
-            convener_list = json.load(f)
-        if convener_list:
-            message = ""
-            for i, item in enumerate(convener_list):
-                message += str(i+1) + '. ' + item + '\n'
+        root.bind("<Escape>", self.go_back)
         
+    def show_teacher_coordinator(self):
+        self.clear_scr()
+        root.title("Teachers")
+        with open('live_wire_team/teachers.json') as f:
+            teacher = json.load(f)
+        if teacher:
+            message = teacher
         else:
             message = "This list is empty"
         
@@ -145,203 +122,642 @@ class Heirarchy_Page(Home_Page):
         msg.grid(padx=160)
         self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.step_back)
         self.step_back_btn.grid(pady=10)
+        root.bind("<Escape>", self.step_back)
     
-    def show_heads(self):
+    def show_conveners(self):
         self.clear_scr()
-        heads_list = {}
-        text_widget = ScrolledText(self.subframe, width=40, height=10,background='#afafaf')
-        with open('members/team_heads.json') as f:
-            heads_list = json.load(f)
-        if heads_list:
-            count=1
-            for team, name in heads_list.items():
-                text_widget.insert(END, str(count) + '. ' + team + ' : ' + name + "\n")
-                count = count+1
+        root.title("Conveners")
+        convener_list = []
+        with open('live_wire_team/conveners.json') as f:
+            convener_list = json.load(f)
+        if convener_list:
+            message = ""
+            for i, item in enumerate(convener_list):
+                message += str(i+1) + '. ' + item + '\n'
         else:
-            text_widget.insert(END,"This list is empty")
-            
-        text_widget.grid(padx=80)
-        self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.step_back)
-        self.step_back_btn.grid(pady=10)
-    
-    def show_active_members(self):
-        self.clear_scr()
-        member_list = []
-        text_widget = ScrolledText(self.subframe, width=40, height=10, background='#afafaf')
-
-        with open('members/active_members.json') as f:
-            member_list = json.load(f)
-        if member_list:
-            # Loop through the list and add each item to the widget
-            for item in sorted(member_list):
-                text_widget.insert(END, item + "\n")
-        else:
-            text_widget.insert(END,"This list is empty")
-        text_widget.grid(padx=80)
-        self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.step_back)
-        self.step_back_btn.grid(pady=10)
-
+            message = "This list is empty"
         
-    def edit_list(self):
-        for child in self.subframe.winfo_children():
-            child.grid_remove()
+        msg = Message(self.subframe, text=message, font=("Helvetica", 16), width=200)
+        msg.grid(padx=160)
+        self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.step_back)
+        self.step_back_btn.grid(pady=10)
+        root.bind("<Escape>", self.step_back)
+        
+    def show_teams(self, *args):
+        self.add_teams()
+        self.event_btn.configure(command=lambda: self.show_team_member_list(0))
+        self.creative_btn.configure(command=lambda: self.show_team_member_list(1))
+        self.technical_btn.configure(command=lambda: self.show_team_member_list(2))
+        self.database_btn.configure(command=lambda: self.show_team_member_list(3))
+        self.photography_btn.configure(command=lambda: self.show_team_member_list(4))
+        self.step_back_btn.configure(command=self.step_back)
+        root.bind("<Escape>", self.step_back)
+        
+    def show_team_member_list(self, index):
+        self.clear_scr()
+        field_name=['Event Management', 'Creative', 'Technical', 'Database', 'Photography']
+        head_files=['event_head.json', 'creative_head.json', 'technical_head.json', 'database_head.json', 'photography_head.json']
+        team_files=['event_team.json', 'creative_team.json', 'technical_team.json', 'database_team.json', 'photography_team.json']
+        root.title(f"{field_name[index]} Team")
+        head_name = ""
+        team_members=[]
+         
+        head_lbl = ttk.Label(self.subframe, text=f"{field_name[index]} head", width=28)
+        head_lbl.grid(row=0, column=0, padx=10, pady=5)
+        head_lbl = ttk.Label(self.subframe, width=28, background='white')
+        head_lbl.grid(row=0, column=1, padx=10, pady=5, sticky=W)
+        with open(f"live_wire_team/{head_files[index]}") as f:
+            head_name = json.load(f)
+        if head_name:
+            head_lbl.configure(text=head_name.title())
+        else:
+            head_lbl.configure(text="")
+        head_lbl = ttk.Label(self.subframe, text=f"{field_name[index]} team", width=28)
+        head_lbl.grid(row=1, column=0, padx=10, pady=5)
+        with open(f"live_wire_team/{team_files[index]}") as f:
+            team_members = json.load(f)
+        names_list_txt = ScrolledText(self.subframe , width=30, height=10, background='white')
+        names_list_txt.grid(row=1, column=1, padx=10, pady=5)
+        for index,member in enumerate(team_members):
+            names_list_txt.insert(END, str(index+1) + ". " + member + "\n")
+        self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.show_teams)
+        self.step_back_btn.grid(row=2, pady=10)
+        root.bind("<Escape>", self.show_teams)
+        
+    def edit_list(self, *args):
+        self.clear_scr()
+        root.title("Edit Options")
         self.add_btn = ttk.Button(self.subframe, text="Add", command=self.add_members)
         self.add_btn.grid(padx=215)
         self.remove_btn = ttk.Button(self.subframe, text="Remove", command=self.remove_members)
         self.remove_btn.grid(pady=10)
         self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.step_back)
         self.step_back_btn.grid(pady=10)
-    
+        root.bind("<Escape>", self.step_back)
         
-    def add_members(self):
-        for child in self.subframe.winfo_children():
-            child.grid_remove()
-        self.conv_lbl = ttk.Label(self.subframe, text="Conveners", background="#DAD7D7", width=12)
-        self.conv_lbl.grid(row=0, column=0, padx=10)
+    def add_members(self, *args):
+        self.clear_scr()
+        root.title("Adding Options")
+        self.teacher_btn = ttk.Button(self.subframe, text="Teachers", command=self.add_teacher_coordinator)
+        self.teacher_btn.grid(padx=215, pady=10)
+        self.convener_btn = ttk.Button(self.subframe, text="Conveners", command=self.add_conveners)
+        self.convener_btn.grid(pady=10)
+        self.teams_btn = ttk.Button(self.subframe, text="Teams", command=self.add_teams)
+        self.teams_btn.grid(pady=10)
+        self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.edit_list)
+        self.step_back_btn.grid(pady=10)
+        root.bind("<Escape>", self.edit_list)
+        
+    def add_teacher_coordinator(self):
+        self.clear_scr()
+        root.title("Adding Teacher")
+        self.teacher_lbl = ttk.Label(self.subframe, text="Teacher", background="#DAD7D7", width=12)
+        self.teacher_lbl.grid(row=0, column=0, padx=10, pady=5)
+        self.teacher_insert = ttk.Entry(self.subframe, width=40)
+        self.teacher_insert.grid(row=0, column=2, sticky=E, padx=80)
+        self.done_btn = ttk.Button(self.subframe, text="Add", command=self.save_teachers_data)
+        self.done_btn.grid(row=1, column=2, padx=10, pady=10)
+        self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.add_members)
+        self.step_back_btn.grid(row=1, pady=10)
+        self.display_msg = Message(self.subframe, text="", width=250, font=("Helvetica", 12))
+        self.display_msg.grid(column=2, padx=20)
+        root.bind("<Return>", self.save_teachers_data)
+        root.bind("<Escape>", self.add_members)
+    
+    def add_conveners(self):
+        self.clear_scr()
+        root.title("Adding Convener")
+        self.teacher_lbl = ttk.Label(self.subframe, text="Convener", background="#DAD7D7", width=12)
+        self.teacher_lbl.grid(row=0, column=0, padx=10, pady=5)
         self.conv_insert = ttk.Entry(self.subframe, width=40)
-        self.conv_insert.grid(row=0, column=1)
-        self.done_btn = ttk.Button(self.subframe, text="Add", command=self.save_data)
-        self.done_btn.grid(row=0, column=2, padx=10)
-        self.title_lbl = ttk.Label(self.subframe, text="Team Name", background="#DAD7D7", width=12)
-        self.title_lbl.grid(row=1, column=0, padx=10, pady=10)
-        self.get_team = ttk.Entry(self.subframe)
-        self.get_team.grid(row=1, column=1, sticky=W)
-        self.name_lbl = ttk.Label(self.subframe, text="Head Name", background="#DAD7D7", width=12)
-        self.name_lbl.grid(row=1, column=1, pady=10, sticky=E)
-        self.get_name = ttk.Entry(self.subframe)
-        self.get_name.grid(row=1, column=2, padx=10)
-        self.members_lbl = ttk.Label(self.subframe, text="Active Members", background="#DAD7D7")
-        self.members_lbl.grid(row=2, column=0, padx=10)
-        self.get_members = Entry(self.subframe, width=30)
-        self.get_members.grid(row=2, column=1, padx=10, pady=15)
-        self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.step_back)
-        self.step_back_btn.grid(column=1 ,pady=10)
-        self.display_msg = Message(self.subframe, textvariable=self.msg, width=250, font=("Helvetica", 12))
-        self.display_msg.grid(column=1, padx=20)
-        
-        root.bind("<Return>", self.save_data)
+        self.conv_insert.grid(row=0, column=2, sticky=E, padx=80)
+        self.done_btn = ttk.Button(self.subframe, text="Add", command=self.save_conveners_data)
+        self.done_btn.grid(row=1, column=2, padx=10, pady=10)
+        self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.add_members)
+        self.step_back_btn.grid(row=1, pady=10)
+        self.display_msg = Message(self.subframe, text="", width=250, font=("Helvetica", 12))
+        self.display_msg.grid(column=2, padx=20)
+        root.bind("<Return>", self.save_conveners_data)
+        root.bind("<Escape>", self.add_members)
     
-    def remove_members(self):
-        self.add_members()
-        self.display_msg.grid_remove()
-        self.done_btn.configure(text="Remove", command = self.delete_data)
-        self.reboot_btn = ttk.Button(self.subframe, text = "Clear All Data", command = self.clear_all_data)
-        self.reboot_btn.grid(column=1 ,pady=10)
-        self.display_msg = Message(self.subframe, textvariable=self.msg, width=250, font=("Helvetica", 12))
-        self.display_msg.grid(column=1, padx=20)
-        root.bind("<Return>", self.delete_data)
-        
-    def delete_data(self, *args):
-        if self.conv_insert.get != "":
-            convener_list = []
+    def add_teams(self, *args):
+        teams_list = ['Events', "Creative", "Technical", "Database", "Photography"]
+        root.title("Select Team")
+        self.clear_scr()
+        self.event_btn = ttk.Button(self.subframe, text=teams_list[0], command=self.add_event_team, width=15)
+        self.event_btn.grid(padx=200, pady=10)
+        self.creative_btn = ttk.Button(self.subframe, text=teams_list[1], command=self.add_creative_team, width=15)
+        self.creative_btn.grid(pady=10)
+        self.technical_btn = ttk.Button(self.subframe, text=teams_list[2], command=self.add_technical_team, width=15)
+        self.technical_btn.grid(pady=10)
+        self.database_btn = ttk.Button(self.subframe, text=teams_list[3], command=self.add_database_team, width=15)
+        self.database_btn.grid(pady=10)
+        self.photography_btn = ttk.Button(self.subframe, text=teams_list[4], command=self.add_photography_team, width=15)
+        self.photography_btn.grid(pady=10)
+        self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.add_members)
+        self.step_back_btn.grid(pady=10)
+        root.bind("<Escape>", self.add_members)
+    
+    def add_event_team(self):
+        self.clear_scr()
+        root.title("Adding Event Team")
+        self.head_lbl = ttk.Label(self.subframe, text="Event Management Head", background="#DAD7D7", width=28)
+        self.head_lbl.grid(row=0, column=0, padx=10, pady=5)
+        self.get_event_head = ttk.Entry(self.subframe, width=40)
+        self.get_event_head.grid(row=0, column=1)
+        self.event_team_lbl = ttk.Label(self.subframe, text="Event Management Team", background="#DAD7D7", width=28)
+        self.event_team_lbl.grid(row=1, column=0, padx=15, pady=15, sticky=N)
+        self.get_event_team = Text(self.subframe, width=35, height=12)
+        self.get_event_team.grid(row=1, column=1, columnspan=2, pady=15, sticky=E, padx=10)
+        self.done_btn = ttk.Button(self.subframe, text="Add", command=self.save_event_team)
+        self.done_btn.grid(row=2, column=1, padx=10, pady=10, sticky=E)
+        self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.add_teams)
+        self.step_back_btn.grid(row=2, pady=10)
+        self.display_msg = Message(self.subframe, text="", width=250, font=("Helvetica", 12))
+        self.display_msg.grid(column=1, sticky=W)
+        root.bind("<Escape>", self.add_teams)
+    
+    def add_creative_team(self):
+        self.add_event_team()
+        root.title("Adding Creative Team")
+        self.head_lbl.configure(text="Creative Head")
+        self.done_btn.configure(command=self.save_creative_team)
+        self.get_event_head.grid_remove()
+        self.get_creative_head = ttk.Entry(self.subframe, width=40)
+        self.get_creative_head.grid(row=0, column=1)
+        self.event_team_lbl.configure(text="Creative Team Members")
+        self.get_event_team.grid_remove()
+        self.get_creative_team = Text(self.subframe, width=35, height=12)
+        self.get_creative_team.grid(row=1, column=1, columnspan=2, pady=15, sticky=E, padx=10)
+    
+    def add_technical_team(self):
+        self.add_event_team()
+        root.title("Adding Technical Team")
+        self.head_lbl.configure(text="Technical Head")
+        self.done_btn.configure(command=self.save_technical_team)
+        self.get_event_head.grid_remove()
+        self.get_technical_head = ttk.Entry(self.subframe, width=40)
+        self.get_technical_head.grid(row=0, column=1)
+        self.event_team_lbl.configure(text="Technical Team Members")
+        self.get_event_team.grid_remove()
+        self.get_technical_team = Text(self.subframe, width=35, height=12)
+        self.get_technical_team.grid(row=1, column=1, columnspan=2, pady=15, sticky=E, padx=10)
+    
+    def add_database_team(self):
+        self.add_event_team()
+        root.title("Adding Database Team")
+        self.head_lbl.configure(text="Database Head")
+        self.done_btn.configure(command=self.save_database_team)
+        self.get_event_head.grid_remove()
+        self.get_database_head = ttk.Entry(self.subframe, width=40)
+        self.get_database_head.grid(row=0, column=1)
+        self.event_team_lbl.configure(text="Database Team Members")
+        self.get_event_team.grid_remove()
+        self.get_database_team = Text(self.subframe, width=35, height=12)
+        self.get_database_team.grid(row=1, column=1, columnspan=2, pady=15, sticky=E, padx=10)
+    
+    def add_photography_team(self):
+        self.add_event_team()
+        root.title("Adding Photography Team")
+        self.head_lbl.configure(text="Photography Head")
+        self.done_btn.configure(command=self.save_photography_team)
+        self.get_event_head.grid_remove()
+        self.get_photography_head = ttk.Entry(self.subframe, width=40)
+        self.get_photography_head.grid(row=0, column=1)
+        self.event_team_lbl.configure(text="Photography Team Members")
+        self.get_event_team.grid_remove()
+        self.get_photography_team = Text(self.subframe, width=35, height=12)
+        self.get_photography_team.grid(row=1, column=1, columnspan=2, pady=15, sticky=E, padx=10)
+    
+    def save_teachers_data(self, *args):
+        if self.teacher_insert.get() != "":
+            teacher = ""
             try:
-                with open('members/conveners.json', 'r') as f:
-                    convener_list = json.load(f)
+                with open('live_wire_team/teachers.json', 'r') as f:
+                    content = json.load(f)    
             except:
                 pass
-            if self.conv_insert.get() in convener_list:
-                convener_list.remove(self.conv_insert.get())
-                with open('members/conveners.json', 'w') as f:
-                    json.dump(convener_list, f)
-                self.msg.set("Data is successfully deleted.")
-            else:
-                self.msg.set(f"\"{self.conv_insert.get()}\" was not found in list")
-            self.conv_insert.delete(0,END)
+            teacher = self.teacher_insert.get()
+            with open('live_wire_team/teachers.json', 'w') as f:
+                json.dump(teacher, f)
+            self.teacher_insert.delete(0, END)
+            self.display_msg.configure(text='Data has been added')
         
-        if self.get_team.get() != "" :
-            team_heads_list = {}
-            try:
-                with open('members/team_heads.json', 'r') as f:
-                    team_heads_list = json.load(f)
-            except:
-                pass
-            if self.get_team.get() in team_heads_list:
-                del team_heads_list[self.get_team.get()]
-                with open('members/team_heads.json', 'w') as f:
-                    json.dump(team_heads_list, f)
-                self.msg.set("Data is successfully deleted.")
-            else:
-                self.msg.set(f"\"{self.get_team.get()}\" was not found in list")
-            self.get_team.delete(0,END)
-            self.get_name.delete(0,END)
-        
-        if self.get_members.get() != "":
-            member_list = []
-            try:
-                with open('members/active_members.json', 'r') as f:
-                    member_list = json.load(f)
-            except:
-                pass
-            if self.get_members.get() in member_list:
-                member_list.remove(self.get_members.get())
-                with open('members/conveners.json', 'w') as f:
-                    json.dump(member_list, f)
-                self.msg.set("Data is successfully deleted.")
-            else:
-                self.msg.set(f"\"{self.get_members.get()}\" was not found in list")
-            self.get_members.delete(0,END)
-            
-    def clear_all_data(self):
-        convener_list = []
-        with open('members/conveners.json', 'w') as f:
-            json.dump(convener_list, f)
-            
-        team_heads = {}
-        with open('members/team_heads.json', 'w') as f:
-            json.dump(team_heads, f)
-            
-        members_list = []
-        with open('members/active_members.json', 'w') as f:
-            json.dump(members_list, f)
-            
-        self.msg.set("All data has been cleared")
-    
-    def step_back(self):
-        for child in self.subframe.winfo_children():
-            child.grid_remove()
-        self.step_back_btn.grid_remove()
-        Heirarchy_Page(root)
-    
-    def save_data(self, *args):
+    def save_conveners_data(self, *args):
         if self.conv_insert.get() != "":
             convener_list = []
             try:
-                with open('members/conveners.json', 'r') as f:
+                with open('live_wire_team/conveners.json', 'r') as f:
                     convener_list = json.load(f)    
             except:
                 pass
             convener_list.append(self.conv_insert.get())
-            with open('members/conveners.json', 'w') as f:
+            with open('live_wire_team/conveners.json', 'w') as f:
                 json.dump(convener_list, f)
             self.conv_insert.delete(0, END)
-            self.msg.set("Data has been added")
+            self.display_msg.configure(text='Data has been added')
         
-        if self.get_name.get() != "" and self.get_team.get() != "":
-            team_heads = {}
+    def save_event_team(self, *args):
+        if self.get_event_head.get() != "":
             try:
-                with open('members/team_heads.json', 'r') as f:
-                    team_heads = json.load(f)
+                with open('live_wire_team/event_head.json', 'r') as f:
+                    old_head = json.load(f)    
             except:
                 pass
-            team_heads[self.get_team.get()] = self.get_name.get()
-            with open('members/team_heads.json', 'w') as f:
-                json.dump(team_heads, f)
-            self.get_team.delete(0, END)
-            self.get_name.delete(0,END)
-            self.msg.set("Data has been added")
-        
-        if self.get_members.get() != "":
-            active_member_list = []
+            new_head = self.get_event_head.get()
+            with open('live_wire_team/event_head.json', 'w') as f:
+                json.dump(new_head, f)
+            self.get_event_head.delete(0, END)
+            self.display_msg.configure(text='Data has been added')
+            
+        if self.get_event_team.get("1.0", 'end-1c') != "":
+            member_list = []
             try:
-                with open('members/active_members.json', 'r') as f:
-                    active_member_list = json.load(f)
-            except FileNotFoundError:
+                with open('live_wire_team/event_team.json', 'r') as f:
+                    member_list = json.load(f)    
+            except:
                 pass
-            active_member_list.append(self.get_members.get())
-            with open('members/active_members.json', 'w') as f:
-                json.dump(active_member_list, f)
-            self.get_members.delete(0, END)
-            self.msg.set("Data has been added")
+            data = self.get_event_team.get("1.0", END)
+            lines = data.split('\n')
+            for line in lines:
+                member_list.append(line)
+            with open('live_wire_team/event_team.json', 'w') as f:
+                json.dump(sorted(member_list), f)
+            self.get_event_team.delete("1.0", END)
+            self.display_msg.configure(text='Data has been added')
+            
+    def save_creative_team(self, *args):
+        if self.get_creative_head.get() != "":
+            try:
+                with open('live_wire_team/creative_head.json', 'r') as f:
+                    old_head = json.load(f)    
+            except:
+                pass
+            new_head = self.get_creative_head.get()
+            with open('live_wire_team/creative_head.json', 'w') as f:
+                json.dump(new_head, f)
+            self.get_creative_head.delete(0, END)
+            self.display_msg.configure(text='Data has been added')
+            
+        if self.get_creative_team.get("1.0", 'end-1c') != "":
+            member_list = []
+            try:
+                with open('live_wire_team/creative_team.json', 'r') as f:
+                    member_list = json.load(f)    
+            except:
+                pass
+            data = self.get_creative_team.get("1.0", END)
+            lines = data.split('\n')
+            for line in lines:
+                member_list.append(line)
+            with open('live_wire_team/creative_team.json', 'w') as f:
+                json.dump(sorted(member_list), f)
+            self.get_creative_team.delete("1.0", END)
+            self.display_msg.configure(text='Data has been added')
+            
+    def save_technical_team(self, *args):
+        if self.get_technical_head.get() != "":
+            try:
+                with open('live_wire_team/technical_head.json', 'r') as f:
+                    old_head = json.load(f)    
+            except:
+                pass
+            new_head = self.get_technical_head.get()
+            with open('live_wire_team/technical_head.json', 'w') as f:
+                json.dump(new_head, f)
+            self.get_technical_head.delete(0, END)
+            self.display_msg.configure(text='Data has been added')
+            
+        if self.get_technical_team.get("1.0", 'end-1c') != "":
+            member_list = []
+            try:
+                with open('live_wire_team/technical_team.json', 'r') as f:
+                    member_list = json.load(f)    
+            except:
+                pass
+            data = self.get_technical_team.get("1.0", END)
+            lines = data.split('\n')
+            for line in lines:
+                member_list.append(line)
+            with open('live_wire_team/technical_team.json', 'w') as f:
+                json.dump(sorted(member_list), f)
+            self.get_technical_team.delete("1.0", END)
+            self.display_msg.configure(text='Data has been added')
+            
+    def save_database_team(self, *args):
+        if self.get_database_head.get() != "":
+            try:
+                with open('live_wire_team/database_head.json', 'r') as f:
+                    old_head = json.load(f)    
+            except:
+                pass
+            new_head = self.get_database_head.get()
+            with open('live_wire_team/database_head.json', 'w') as f:
+                json.dump(new_head, f)
+            self.get_database_head.delete(0, END)
+            self.display_msg.configure(text='Data has been added')
+            
+        if self.get_database_team.get("1.0", 'end-1c') != "":
+            member_list = []
+            try:
+                with open('live_wire_team/database_team.json', 'r') as f:
+                    member_list = json.load(f)    
+            except:
+                pass
+            data = self.get_database_team.get("1.0", END)
+            lines = data.split('\n')
+            for line in lines:
+                member_list.append(line)
+            with open('live_wire_team/database_team.json', 'w') as f:
+                json.dump(sorted(member_list), f)
+            self.get_database_team.delete("1.0", END)
+            self.display_msg.configure(text='Data has been added')
+    
+    def save_photography_team(self, *args):
+        if self.get_photography_head.get() != "":
+            try:
+                with open('live_wire_team/photography_head.json', 'r') as f:
+                    old_head = json.load(f)    
+            except:
+                pass
+            new_head = self.get_photography_head.get()
+            with open('live_wire_team/photography_head.json', 'w') as f:
+                json.dump(new_head, f)
+            self.get_photography_head.delete(0, END)
+            self.display_msg.configure(text='Data has been added')
+            
+        if self.get_photography_team.get("1.0", 'end-1c') != "":
+            member_list = []
+            try:
+                with open('live_wire_team/photography_team.json', 'r') as f:
+                    member_list = json.load(f)    
+            except:
+                pass
+            data = self.get_photography_team.get("1.0", END)
+            lines = data.split('\n')
+            for line in lines:
+                member_list.append(line)
+            with open('live_wire_team/photography_team.json', 'w') as f:
+                json.dump(sorted(member_list), f)
+            self.get_photography_team.delete("1.0", END)
+            self.display_msg.configure(text='Data has been added')
+            
+    def remove_members(self, *args):
+        self.add_members()
+        self.teacher_btn.configure(command=self.remove_teacher)
+        self.convener_btn.configure(command=self.remove_convener)
+        self.teams_btn.configure(command=self.select_team)
+        self.reboot_btn = ttk.Button(self.subframe, text = "Clear All Data", command = self.clear_all_data)
+        self.reboot_btn.grid(pady=10)
+        root.bind("<Escape>", self.edit_list)
+        
+    def remove_teacher(self):
+        self.add_teacher_coordinator()
+        root.title("Removing Teacher")
+        self.done_btn.configure(text="Remove", command=self.delete_teacher)
+        self.step_back_btn.configure(command=self.remove_members)
+        root.bind("<Escape>", self.remove_members)
+        
+    def delete_teacher(self):
+        if self.teacher_insert.get() != "":
+            with open("live_wire_team/teachers.json") as f:
+                content = json.load(f)
+            if self.teacher_insert.get() == content:
+                content=""
+                with open("live_wire_team/teachers.json", 'w') as f:
+                    json.dump(content, f)
+                self.display_msg.configure(text="Data successfully deleted")
+            else:
+                self.display_msg.configure(text="Data not found in list")    
+            self.teacher_insert.delete(0, END)
+            
+    def remove_convener(self):
+        self.add_conveners()
+        root.title("Removing Convener")
+        self.done_btn.configure(text="Remove", command=self.delete_convener)
+        self.step_back_btn.configure(command=self.remove_members)
+        root.bind("<Escape>", self.remove_members)
+        
+    def delete_convener(self):
+        if self.conv_insert.get() != "":
+            content = []
+            with open("live_wire_team/conveners.json") as f:
+                content = json.load(f)
+            if self.conv_insert.get() in content:
+                del content[self.conv_insert]
+                with open("live_wire_team/conveners.json", 'w') as f:
+                    json.dump(content, f)
+                    self.display_msg.configure(text="Data successfully deleted")
+            else:
+                self.display_msg.configure(text="Data not found in list")    
+            self.conv_insert.delete(0, END)
+    
+    def select_team(self, *args):
+        self.add_teams()
+        self.event_btn.configure(command=self.remove_event_team)
+        self.creative_btn.configure(command=self.remove_creative_team)
+        self.technical_btn.configure(command=self.remove_technical_team)
+        self.database_btn.configure(command=self.remove_database_team)
+        self.photography_btn.configure(command=self.remove_photography_team)
+        self.step_back_btn.configure(command=self.remove_members)
+        root.bind("<Escape>", self.remove_members)
+    
+    def remove_event_team(self):
+        self.add_event_team()
+        root.title("Removing Event Team")
+        self.get_event_team.grid_remove()
+        self.get_event_head = ttk.Entry(self.subframe, width=40)
+        self.get_event_head.grid(row=0, column=1)
+        self.get_event_team = ttk.Entry(self.subframe, width=40)
+        self.get_event_head.grid(row=1, column=1)
+        self.done_btn.configure(text="Remove", command=self.delete_event_team)
+        self.step_back_btn.configure(command=self.select_team)
+        root.bind("<Escape>", self.select_team)
+    
+    def delete_event_team(self):
+        if self.get_event_head.get() != "":
+            with open('live_wire_team/event_head.json') as f:
+                content = json.load(f)
+            if content == self.get_event_head.get():
+                with open('live_wire_team/event_head.json', 'w') as f:
+                    json.dump("", f)
+                self.display_msg.configure(text="Data sucessfully removed")
+            else:
+                self.display_msg.configure(text="Data not found in list")
+            self.get_event_head.delete(0, END)
+            
+        if self.get_event_team.get() != "":
+            with open('live_wire_team/event_team.json') as f:
+                content = json.load(f)
+            if self.get_event_team.get() in content:
+                del content[self.get_event_team.get()]
+                with open('live_wire_team/event_team.json', 'w') as f:
+                    json.dump(content, f)
+                self.display_msg.configure(text="Data sucessfully removed")
+            else:
+                self.display_msg.configure(text="Data not found in list")
+            self.get_event_team.delete(0, END)
+    
+    def remove_creative_team(self):
+        self.add_creative_team()
+        root.title("Removing Creative Team")
+        self.get_creative_team.grid_remove()
+        self.get_creative_head = ttk.Entry(self.subframe, width=40)
+        self.get_creative_head.grid(row=0, column=1)
+        self.get_creative_team = ttk.Entry(self.subframe, width=40)
+        self.get_creative_head.grid(row=1, column=1)
+        self.done_btn.configure(text="Remove", command=self.delete_creative_team)
+        self.step_back_btn.configure(command=self.select_team)
+        root.bind("<Escape>", self.select_team)
+    
+    def delete_creative_team(self):
+        if self.get_creative_head.get() != "":
+            with open('live_wire_team/creative_head.json') as f:
+                content = json.load(f)
+            if content == self.get_creative_head.get():
+                with open('live_wire_team/creative_head.json', 'w') as f:
+                    json.dump("", f)
+                self.display_msg.configure(text="Data sucessfully removed")
+            else:
+                self.display_msg.configure(text="Data not found in list")
+            self.get_creative_head.delete(0, END)
+            
+        if self.get_creative_team.get() != "":
+            with open('live_wire_team/creative_team.json') as f:
+                content = json.load(f)
+            if self.get_creative_team.get() in content:
+                del content[self.get_creative_team.get()]
+                with open('live_wire_team/creative_team.json', 'w') as f:
+                    json.dump(content, f)
+                self.display_msg.configure(text="Data sucessfully removed")
+            else:
+                self.display_msg.configure(text="Data not found in list")
+            self.get_creative_team.delete(0, END)
+    
+    def remove_technical_team(self):
+        self.add_technical_team()
+        root.title("Removing Technical Team")
+        self.get_technical_team.grid_remove()
+        self.get_technical_head = ttk.Entry(self.subframe, width=40)
+        self.get_technical_head.grid(row=0, column=1)
+        self.get_technical_team = ttk.Entry(self.subframe, width=40)
+        self.get_technical_head.grid(row=1, column=1)
+        self.done_btn.configure(text="Remove", command=self.delete_technical_team)
+        self.step_back_btn.configure(command=self.select_team)
+        root.bind("<Escape>", self.select_team)
+    
+    def delete_technical_team(self):
+        if self.get_technical_head.get() != "":
+            with open('live_wire_team/technical_head.json') as f:
+                content = json.load(f)
+            if content == self.get_technical_head.get():
+                with open('live_wire_team/technical_head.json', 'w') as f:
+                    json.dump("", f)
+                self.display_msg.configure(text="Data sucessfully removed")
+            else:
+                self.display_msg.configure(text="Data not found in list")
+            self.get_technical_head.delete(0, END)
+            
+        if self.get_technical_team.get() != "":
+            with open('live_wire_team/technical_team.json') as f:
+                content = json.load(f)
+            if self.get_technical_team.get() in content:
+                del content[self.get_technical_team.get()]
+                with open('live_wire_team/technical_team.json', 'w') as f:
+                    json.dump(content, f)
+                self.display_msg.configure(text="Data sucessfully removed")
+            else:
+                self.display_msg.configure(text="Data not found in list")
+            self.get_technical_team.delete(0, END)
+    
+    def remove_database_team(self):
+        self.add_database_team()
+        root.title("Removing Database Team")
+        self.get_database_team.grid_remove()
+        self.get_database_head = ttk.Entry(self.subframe, width=40)
+        self.get_database_head.grid(row=0, column=1)
+        self.get_database_team = ttk.Entry(self.subframe, width=40)
+        self.get_database_head.grid(row=1, column=1)
+        self.done_btn.configure(text="Remove", command=self.delete_database_team)
+        self.step_back_btn.configure(command=self.select_team)
+        root.bind("<Escape>", self.select_team)
+    
+    def delete_database_team(self):
+        if self.get_database_head.get() != "":
+            with open('live_wire_team/database_head.json') as f:
+                content = json.load(f)
+            if content == self.get_database_head.get():
+                with open('live_wire_team/database_head.json', 'w') as f:
+                    json.dump("", f)
+                self.display_msg.configure(text="Data sucessfully removed")
+            else:
+                self.display_msg.configure(text="Data not found in list")
+            self.get_database_head.delete(0, END)
+            
+        if self.get_database_team.get() != "":
+            with open('live_wire_team/database_team.json') as f:
+                content = json.load(f)
+            if self.get_database_team.get() in content:
+                del content[self.get_database_team.get()]
+                with open('live_wire_team/database_team.json', 'w') as f:
+                    json.dump(content, f)
+                self.display_msg.configure(text="Data sucessfully removed")
+            else:
+                self.display_msg.configure(text="Data not found in list")
+            self.get_database_team.delete(0, END)
+    
+    def remove_photography_team(self):
+        self.add_photography_team()
+        root.title("Removing Photography Team")
+        self.get_photography_team.grid_remove()
+        self.get_photography_head = ttk.Entry(self.subframe, width=40)
+        self.get_photography_head.grid(row=0, column=1)
+        self.get_photography_team = ttk.Entry(self.subframe, width=40)
+        self.get_photography_head.grid(row=1, column=1)
+        self.done_btn.configure(text="Remove", command=self.delete_photography_team)
+        self.step_back_btn.configure(command=self.select_team)
+        root.bind("<Escape>", self.select_team)
+    
+    def delete_photography_team(self):
+        if self.get_event_head.get() != "":
+            with open('live_wire_team/event_head.json') as f:
+                content = json.load(f)
+            if content == self.get_event_head.get():
+                with open('live_wire_team/event_head.json', 'w') as f:
+                    json.dump("", f)
+                self.display_msg.configure(text="Data sucessfully removed")
+            else:
+                self.display_msg.configure(text="Data not found in list")
+            self.get_event_head.delete(0, END)
+            
+        if self.get_event_team.get() != "":
+            with open('live_wire_team/event_team.json') as f:
+                content = json.load(f)
+            if self.get_event_team.get() in content:
+                del content[self.get_event_team.get()]
+                with open('live_wire_team/event_team.json', 'w') as f:
+                    json.dump(content, f)
+                self.display_msg.configure(text="Data sucessfully removed")
+            else:
+                self.display_msg.configure(text="Data not found in list")
+            self.get_event_team.delete(0, END)
+            
+    def clear_all_data(self):
+        convener_list = []
+        files_list=['conveners.json','creative_head.json','creative_team.json',
+                    'database_head.json','event_head.json','photography_head.json',
+                    'technical_head.json','database_team.json','event_team.json',
+                    'photography_team.json','technical_team.json','teachers.json']
+        for file in files_list:
+            with open(f'live_wire_team/{file}', 'w') as f:
+                json.dump(convener_list, f)
+        self.reboot_btn.configure(text='Done')
+    
+    def step_back(self, *args):
+        for child in self.subframe.winfo_children():
+            child.grid_remove()
+        self.step_back_btn.grid_remove()
+        Heirarchy_Page(root)
     
 class Events_Page(Home_Page):
     def __init__(self, root):
@@ -350,7 +766,6 @@ class Events_Page(Home_Page):
         self.events_btn.destroy()
         self.images_btn.destroy()
         self.quit_btn.destroy()
-        self.mode_btn.destroy()
         self.use_btn.destroy()
         self.list_of_events = Listbox(self.subframe, height=15, width=30)
         self.list_of_events.grid(padx=150)
@@ -378,7 +793,6 @@ class Images_Page(Home_Page):
         self.go_back_btn = ttk.Button(self.subframe, text = "Back", command = self.go_back)
         self.go_back_btn.grid(pady=10)
         self.quit_btn.grid_remove()
-        self.mode_btn.grid_remove()
         self.use_btn.grid_remove()
         
     def go_back(self, *args):
@@ -386,8 +800,6 @@ class Images_Page(Home_Page):
         Home_Page(root)
         
 if __name__ == '__main__':
-    root = Tk()    
-    style = ThemedStyle()
-    style.theme_use("clam")
+    root = Tk()
     Home_Page(root)
     root.mainloop()

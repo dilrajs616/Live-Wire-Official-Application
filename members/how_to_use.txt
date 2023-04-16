@@ -1,6 +1,0 @@
-		Heirarchy Page
-
-1. It shows the heirarchy of club members.
-2. You can "Add" or "Remove" members using Edit button.
-3. Only one member from each department can be added or removed at a time.
-4. To remove a member, just type the name of member their corresponding department name and press "Enter".
