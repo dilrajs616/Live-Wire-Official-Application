@@ -750,8 +750,9 @@ class Events_Page(Home_Page):
         super().__init__(root)
         self.clear_scr()
         events_list=[]
+        ttk.Label(self.subframe, text="List of Events", font=("Helvetica", 16)).grid(row=0, column=0, sticky=N)
         self.list_of_events = Listbox(self.subframe, height=15, width=40)
-        self.list_of_events.grid(padx=150)
+        self.list_of_events.grid(row=0, column=1, padx=50)
         try:
             with open("events/event_names.json") as f:
                 events_list = json.load(f)
@@ -761,26 +762,74 @@ class Events_Page(Home_Page):
             self.list_of_events.insert(END, event.title())
             if index%2==0:
                 self.list_of_events.itemconfigure(index, background='#f0f0ff')
-        self.create_event_btn = ttk.Button(self.subframe, text="Create Event", command=self.create_event)
-        self.create_event_btn.grid(row=1, padx=50, pady=20, sticky=E)
+        self.create_event_btn = ttk.Button(self.subframe, text="Create New Event", command=self.create_event)
+        self.create_event_btn.grid(row=1, column=1, pady=20)
         self.go_back_btn = ttk.Button(self.subframe, text = "Back", command = self.go_back)
-        self.go_back_btn.grid(row=1,padx=50, pady=20, sticky=W)
+        self.go_back_btn.grid(row=1, column=0 , padx=30, pady=20, sticky=W)
+        
+        root.bind("<Escape>", self.go_back)
+        self.list_of_events.bind("<<ListboxSelect>>", self.display_event)
         
     def create_event(self):
         self.clear_scr()
-        self.event_name_lbl = ttk.Label(self.subframe, text="Event Name", width=25)
+        self.event_name_lbl = ttk.Label(self.subframe, text="Event Name", width=20)
         self.event_name_lbl.grid(row=0, column=0)
         self.get_event_name = ttk.Entry(self.subframe, width=40)
         self.get_event_name.grid(row=0, column=1, sticky=W)
-        self.event_name_lbl = ttk.Label(self.subframe, text="Event Details", width=25)
+        self.event_name_lbl = ttk.Label(self.subframe, text="Event Details", width=20)
         self.event_name_lbl.grid(row=1, column=0, sticky=N, pady=10)
-        self.get_event_details = Text(self.subframe, width=40, height=13)
+        self.get_event_details = Text(self.subframe, width=37, height=13)
         self.get_event_details.grid(row=1, column=1, pady=10)
+        self.create_event_btn = ttk.Button(self.subframe, text="Done", command=self.save_event_data)
+        self.create_event_btn.grid(row=2, column=1, padx=50)
+        self.go_back_btn = ttk.Button(self.subframe, text = "Back", command = self.step_back)
+        self.go_back_btn.grid(row=2, column=0, padx=50, sticky=W)
+        self.display_msg = ttk.Label(self.subframe, text="", font=("Helvetica", 16))
+        self.display_msg.grid(column=1, sticky=W, pady=5, padx=40)
         
+        root.bind("<Escape>", self.step_back)
+        self.get_event_details.bind("<Control-v>", self.paste_text)
+                
+    def save_event_data(self):
+        events_list = []
+        if self.get_event_name.get() != "" and self.get_event_details.get(1.0, END) == "":
+            self.display_msg.configure(text="Enter event details first")
+                
+        if self.get_event_details.get(1.0, END) != "" and self.get_event_name.get() == "":
+            self.display_msg.configure(text="Enter event name first")
+            
+        if self.get_event_details.get(1.0, END) != "" and self.get_event_name.get() != "":
+            try:
+                with open("events/event_names.json") as f:
+                    events_list = json.load(f)
+            except:
+                pass
+            events_list.append(self.get_event_name.get())
+            with open("events/event_names.json", 'w') as f:
+                json.dump(events_list, f)
+            with open(f"events/{self.get_event_name.get()}.json", 'w') as f:
+                json.dump(self.get_event_details.get(1.0, END), f)
+            self.display_msg.configure(text="Event details saved")
         
-    def go_back(self, *args):
-        self.subframe.grid_remove()
-        Home_Page(root)
+    def paste_text(self,event):
+        event.widget.insert(INSERT, root.clipboard_get())
+        
+    def display_event(self, event):
+        selected_item = event.widget.get(event.widget.curselection())
+        with open(f'events/{selected_item}.json') as f:
+            content = json.load(f)
+        new_root = Tk()
+        new_root.title(selected_item)
+        display_content = ScrolledText(new_root)
+        display_content.insert(END, content)
+        display_content.grid(row=0, column=0, sticky=(N,S,E,W))
+        new_root.rowconfigure(0, weight=1)
+        new_root.columnconfigure(0, weight=1)
+        new_root.mainloop()
+        
+    def step_back(self, *args):
+        self.clear_scr()
+        Events_Page(root)
      
             
 class Images_Page(Home_Page):
