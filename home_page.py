@@ -119,7 +119,7 @@ class Heirarchy_Page(Home_Page):
             message = "This list is empty"
         
         msg = Message(self.subframe, text=message, font=("Helvetica", 16), width=200)
-        msg.grid(padx=160)
+        msg.grid(padx=180)
         self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.step_back)
         self.step_back_btn.grid(pady=10)
         root.bind("<Escape>", self.step_back)
@@ -138,7 +138,7 @@ class Heirarchy_Page(Home_Page):
             message = "This list is empty"
         
         msg = Message(self.subframe, text=message, font=("Helvetica", 16), width=200)
-        msg.grid(padx=160)
+        msg.grid(padx=180)
         self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.step_back)
         self.step_back_btn.grid(pady=10)
         root.bind("<Escape>", self.step_back)
@@ -173,7 +173,7 @@ class Heirarchy_Page(Home_Page):
         else:
             head_lbl.configure(text="")
         head_lbl = ttk.Label(self.subframe, text=f"{field_name[index]} team", width=28)
-        head_lbl.grid(row=1, column=0, padx=10, pady=5)
+        head_lbl.grid(row=1, column=0, padx=10, pady=5, sticky=N)
         with open(f"live_wire_team/{team_files[index]}") as f:
             team_members = json.load(f)
         names_list_txt = ScrolledText(self.subframe , width=30, height=10, background='white')
@@ -221,7 +221,6 @@ class Heirarchy_Page(Home_Page):
         self.step_back_btn.grid(row=1, pady=10)
         self.display_msg = Message(self.subframe, text="", width=250, font=("Helvetica", 12))
         self.display_msg.grid(column=2, padx=20)
-        root.bind("<Return>", self.save_teachers_data)
         root.bind("<Escape>", self.add_members)
     
     def add_conveners(self):
@@ -237,7 +236,6 @@ class Heirarchy_Page(Home_Page):
         self.step_back_btn.grid(row=1, pady=10)
         self.display_msg = Message(self.subframe, text="", width=250, font=("Helvetica", 12))
         self.display_msg.grid(column=2, padx=20)
-        root.bind("<Return>", self.save_conveners_data)
         root.bind("<Escape>", self.add_members)
     
     def add_teams(self, *args):
@@ -359,11 +357,6 @@ class Heirarchy_Page(Home_Page):
         
     def save_event_team(self, *args):
         if self.get_event_head.get() != "":
-            try:
-                with open('live_wire_team/event_head.json', 'r') as f:
-                    old_head = json.load(f)    
-            except:
-                pass
             new_head = self.get_event_head.get()
             with open('live_wire_team/event_head.json', 'w') as f:
                 json.dump(new_head, f)
@@ -378,9 +371,11 @@ class Heirarchy_Page(Home_Page):
             except:
                 pass
             data = self.get_event_team.get("1.0", END)
+            data.strip()
             lines = data.split('\n')
             for line in lines:
-                member_list.append(line)
+                if line!="":
+                    member_list.append(line)
             with open('live_wire_team/event_team.json', 'w') as f:
                 json.dump(sorted(member_list), f)
             self.get_event_team.delete("1.0", END)
@@ -388,11 +383,6 @@ class Heirarchy_Page(Home_Page):
             
     def save_creative_team(self, *args):
         if self.get_creative_head.get() != "":
-            try:
-                with open('live_wire_team/creative_head.json', 'r') as f:
-                    old_head = json.load(f)    
-            except:
-                pass
             new_head = self.get_creative_head.get()
             with open('live_wire_team/creative_head.json', 'w') as f:
                 json.dump(new_head, f)
@@ -407,9 +397,11 @@ class Heirarchy_Page(Home_Page):
             except:
                 pass
             data = self.get_creative_team.get("1.0", END)
+            data.strip()
             lines = data.split('\n')
             for line in lines:
-                member_list.append(line)
+                if line != "":
+                    member_list.append(line)
             with open('live_wire_team/creative_team.json', 'w') as f:
                 json.dump(sorted(member_list), f)
             self.get_creative_team.delete("1.0", END)
@@ -417,11 +409,6 @@ class Heirarchy_Page(Home_Page):
             
     def save_technical_team(self, *args):
         if self.get_technical_head.get() != "":
-            try:
-                with open('live_wire_team/technical_head.json', 'r') as f:
-                    old_head = json.load(f)    
-            except:
-                pass
             new_head = self.get_technical_head.get()
             with open('live_wire_team/technical_head.json', 'w') as f:
                 json.dump(new_head, f)
@@ -436,9 +423,11 @@ class Heirarchy_Page(Home_Page):
             except:
                 pass
             data = self.get_technical_team.get("1.0", END)
+            data.strip()
             lines = data.split('\n')
             for line in lines:
-                member_list.append(line)
+                if line != "":
+                    member_list.append(line)
             with open('live_wire_team/technical_team.json', 'w') as f:
                 json.dump(sorted(member_list), f)
             self.get_technical_team.delete("1.0", END)
@@ -446,11 +435,6 @@ class Heirarchy_Page(Home_Page):
             
     def save_database_team(self, *args):
         if self.get_database_head.get() != "":
-            try:
-                with open('live_wire_team/database_head.json', 'r') as f:
-                    old_head = json.load(f)    
-            except:
-                pass
             new_head = self.get_database_head.get()
             with open('live_wire_team/database_head.json', 'w') as f:
                 json.dump(new_head, f)
@@ -465,9 +449,11 @@ class Heirarchy_Page(Home_Page):
             except:
                 pass
             data = self.get_database_team.get("1.0", END)
+            data.strip()
             lines = data.split('\n')
             for line in lines:
-                member_list.append(line)
+                if line != "":
+                    member_list.append(line)
             with open('live_wire_team/database_team.json', 'w') as f:
                 json.dump(sorted(member_list), f)
             self.get_database_team.delete("1.0", END)
@@ -475,11 +461,6 @@ class Heirarchy_Page(Home_Page):
     
     def save_photography_team(self, *args):
         if self.get_photography_head.get() != "":
-            try:
-                with open('live_wire_team/photography_head.json', 'r') as f:
-                    old_head = json.load(f)    
-            except:
-                pass
             new_head = self.get_photography_head.get()
             with open('live_wire_team/photography_head.json', 'w') as f:
                 json.dump(new_head, f)
@@ -494,9 +475,11 @@ class Heirarchy_Page(Home_Page):
             except:
                 pass
             data = self.get_photography_team.get("1.0", END)
+            data.strip()
             lines = data.split('\n')
             for line in lines:
-                member_list.append(line)
+                if line != "":
+                    member_list.append(line)
             with open('live_wire_team/photography_team.json', 'w') as f:
                 json.dump(sorted(member_list), f)
             self.get_photography_team.delete("1.0", END)
@@ -504,6 +487,7 @@ class Heirarchy_Page(Home_Page):
             
     def remove_members(self, *args):
         self.add_members()
+        root.title("Removing Options")
         self.teacher_btn.configure(command=self.remove_teacher)
         self.convener_btn.configure(command=self.remove_convener)
         self.teams_btn.configure(command=self.select_team)
@@ -517,8 +501,9 @@ class Heirarchy_Page(Home_Page):
         self.done_btn.configure(text="Remove", command=self.delete_teacher)
         self.step_back_btn.configure(command=self.remove_members)
         root.bind("<Escape>", self.remove_members)
+        root.bind("<Return>", self.delete_teacher)
         
-    def delete_teacher(self):
+    def delete_teacher(self, *args):
         if self.teacher_insert.get() != "":
             with open("live_wire_team/teachers.json") as f:
                 content = json.load(f)
@@ -537,14 +522,15 @@ class Heirarchy_Page(Home_Page):
         self.done_btn.configure(text="Remove", command=self.delete_convener)
         self.step_back_btn.configure(command=self.remove_members)
         root.bind("<Escape>", self.remove_members)
+        root.bind("<Return>", self.delete_convener)
         
-    def delete_convener(self):
+    def delete_convener(self, *args):
         if self.conv_insert.get() != "":
             content = []
             with open("live_wire_team/conveners.json") as f:
                 content = json.load(f)
             if self.conv_insert.get() in content:
-                del content[self.conv_insert]
+                content.remove(self.conv_insert.get())
                 with open("live_wire_team/conveners.json", 'w') as f:
                     json.dump(content, f)
                     self.display_msg.configure(text="Data successfully deleted")
@@ -569,12 +555,13 @@ class Heirarchy_Page(Home_Page):
         self.get_event_head = ttk.Entry(self.subframe, width=40)
         self.get_event_head.grid(row=0, column=1)
         self.get_event_team = ttk.Entry(self.subframe, width=40)
-        self.get_event_head.grid(row=1, column=1)
+        self.get_event_team.grid(row=1, column=1)
         self.done_btn.configure(text="Remove", command=self.delete_event_team)
         self.step_back_btn.configure(command=self.select_team)
         root.bind("<Escape>", self.select_team)
+        root.bind("<Return>", self.delete_event_team)
     
-    def delete_event_team(self):
+    def delete_event_team(self, *args):
         if self.get_event_head.get() != "":
             with open('live_wire_team/event_head.json') as f:
                 content = json.load(f)
@@ -590,7 +577,7 @@ class Heirarchy_Page(Home_Page):
             with open('live_wire_team/event_team.json') as f:
                 content = json.load(f)
             if self.get_event_team.get() in content:
-                del content[self.get_event_team.get()]
+                content.remove(self.get_event_team.get())
                 with open('live_wire_team/event_team.json', 'w') as f:
                     json.dump(content, f)
                 self.display_msg.configure(text="Data sucessfully removed")
@@ -605,12 +592,12 @@ class Heirarchy_Page(Home_Page):
         self.get_creative_head = ttk.Entry(self.subframe, width=40)
         self.get_creative_head.grid(row=0, column=1)
         self.get_creative_team = ttk.Entry(self.subframe, width=40)
-        self.get_creative_head.grid(row=1, column=1)
+        self.get_creative_team.grid(row=1, column=1)
         self.done_btn.configure(text="Remove", command=self.delete_creative_team)
         self.step_back_btn.configure(command=self.select_team)
         root.bind("<Escape>", self.select_team)
     
-    def delete_creative_team(self):
+    def delete_creative_team(self, *args):
         if self.get_creative_head.get() != "":
             with open('live_wire_team/creative_head.json') as f:
                 content = json.load(f)
@@ -626,7 +613,7 @@ class Heirarchy_Page(Home_Page):
             with open('live_wire_team/creative_team.json') as f:
                 content = json.load(f)
             if self.get_creative_team.get() in content:
-                del content[self.get_creative_team.get()]
+                content.remove(self.get_creative_team.get())
                 with open('live_wire_team/creative_team.json', 'w') as f:
                     json.dump(content, f)
                 self.display_msg.configure(text="Data sucessfully removed")
@@ -641,12 +628,12 @@ class Heirarchy_Page(Home_Page):
         self.get_technical_head = ttk.Entry(self.subframe, width=40)
         self.get_technical_head.grid(row=0, column=1)
         self.get_technical_team = ttk.Entry(self.subframe, width=40)
-        self.get_technical_head.grid(row=1, column=1)
+        self.get_technical_team.grid(row=1, column=1)
         self.done_btn.configure(text="Remove", command=self.delete_technical_team)
         self.step_back_btn.configure(command=self.select_team)
         root.bind("<Escape>", self.select_team)
     
-    def delete_technical_team(self):
+    def delete_technical_team(self, *args):
         if self.get_technical_head.get() != "":
             with open('live_wire_team/technical_head.json') as f:
                 content = json.load(f)
@@ -677,12 +664,12 @@ class Heirarchy_Page(Home_Page):
         self.get_database_head = ttk.Entry(self.subframe, width=40)
         self.get_database_head.grid(row=0, column=1)
         self.get_database_team = ttk.Entry(self.subframe, width=40)
-        self.get_database_head.grid(row=1, column=1)
+        self.get_database_team.grid(row=1, column=1)
         self.done_btn.configure(text="Remove", command=self.delete_database_team)
         self.step_back_btn.configure(command=self.select_team)
         root.bind("<Escape>", self.select_team)
     
-    def delete_database_team(self):
+    def delete_database_team(self, *args):
         if self.get_database_head.get() != "":
             with open('live_wire_team/database_head.json') as f:
                 content = json.load(f)
@@ -713,12 +700,12 @@ class Heirarchy_Page(Home_Page):
         self.get_photography_head = ttk.Entry(self.subframe, width=40)
         self.get_photography_head.grid(row=0, column=1)
         self.get_photography_team = ttk.Entry(self.subframe, width=40)
-        self.get_photography_head.grid(row=1, column=1)
+        self.get_photography_team.grid(row=1, column=1)
         self.done_btn.configure(text="Remove", command=self.delete_photography_team)
         self.step_back_btn.configure(command=self.select_team)
         root.bind("<Escape>", self.select_team)
     
-    def delete_photography_team(self):
+    def delete_photography_team(self, *args):
         if self.get_event_head.get() != "":
             with open('live_wire_team/event_head.json') as f:
                 content = json.load(f)
@@ -754,29 +741,42 @@ class Heirarchy_Page(Home_Page):
         self.reboot_btn.configure(text='Done')
     
     def step_back(self, *args):
-        for child in self.subframe.winfo_children():
-            child.grid_remove()
+        self.clear_scr()
         self.step_back_btn.grid_remove()
         Heirarchy_Page(root)
     
 class Events_Page(Home_Page):
     def __init__(self, root):
         super().__init__(root)
-        self.heirarchy_btn.destroy()
-        self.events_btn.destroy()
-        self.images_btn.destroy()
-        self.quit_btn.destroy()
-        self.use_btn.destroy()
-        self.list_of_events = Listbox(self.subframe, height=15, width=30)
+        self.clear_scr()
+        events_list=[]
+        self.list_of_events = Listbox(self.subframe, height=15, width=40)
         self.list_of_events.grid(padx=150)
-        self.list_of_events.insert(END, "This section is under work")
+        try:
+            with open("events/event_names.json") as f:
+                events_list = json.load(f)
+        except:
+            pass
+        for index,event in enumerate(events_list):
+            self.list_of_events.insert(END, event.title())
+            if index%2==0:
+                self.list_of_events.itemconfigure(index, background='#f0f0ff')
         self.create_event_btn = ttk.Button(self.subframe, text="Create Event", command=self.create_event)
-        self.create_event_btn.grid(pady=10)
+        self.create_event_btn.grid(row=1, padx=50, pady=20, sticky=E)
         self.go_back_btn = ttk.Button(self.subframe, text = "Back", command = self.go_back)
-        self.go_back_btn.grid()
+        self.go_back_btn.grid(row=1,padx=50, pady=20, sticky=W)
         
     def create_event(self):
-        pass
+        self.clear_scr()
+        self.event_name_lbl = ttk.Label(self.subframe, text="Event Name", width=25)
+        self.event_name_lbl.grid(row=0, column=0)
+        self.get_event_name = ttk.Entry(self.subframe, width=40)
+        self.get_event_name.grid(row=0, column=1, sticky=W)
+        self.event_name_lbl = ttk.Label(self.subframe, text="Event Details", width=25)
+        self.event_name_lbl.grid(row=1, column=0, sticky=N, pady=10)
+        self.get_event_details = Text(self.subframe, width=40, height=13)
+        self.get_event_details.grid(row=1, column=1, pady=10)
+        
         
     def go_back(self, *args):
         self.subframe.grid_remove()
