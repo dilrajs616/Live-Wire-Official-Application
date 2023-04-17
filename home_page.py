@@ -1,3 +1,4 @@
+import os
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
@@ -762,14 +763,62 @@ class Events_Page(Home_Page):
             self.list_of_events.insert(END, event.title())
             if index%2==0:
                 self.list_of_events.itemconfigure(index, background='#f0f0ff')
+        self.delete_event_btn = ttk.Button(self.subframe, text = "Delete Event", command = self.delete_event)
+        self.delete_event_btn.grid(row=1, column=0 , pady=5, sticky=W, padx=15)
+        self.open_event_btn = ttk.Button(self.subframe, text="Open Event Details", command=self.display_event)
+        self.open_event_btn.grid(row=1, column=1, padx=15, pady=5, sticky=E)
         self.create_event_btn = ttk.Button(self.subframe, text="Create New Event", command=self.create_event)
-        self.create_event_btn.grid(row=1, column=1, pady=20)
+        self.create_event_btn.grid(row=1, column=1, pady=5, padx=40, sticky=W)
         self.go_back_btn = ttk.Button(self.subframe, text = "Back", command = self.go_back)
-        self.go_back_btn.grid(row=1, column=0 , padx=30, pady=20, sticky=W)
+        self.go_back_btn.grid(row=2, column=1 , padx=30, pady=5, sticky=W)
         
         root.bind("<Escape>", self.go_back)
-        self.list_of_events.bind("<<ListboxSelect>>", self.display_event)
         
+    def delete_event(self):
+        with open("events/event_names.json") as f:
+            events_list = json.load(f)
+        try:
+            selected_item = self.list_of_events.get(self.list_of_events.curselection())
+            if selected_item in events_list:
+                events_list.remove(selected_item)
+            with open("events/event_names.json", 'w') as f:
+                json.dump(events_list ,f)
+            os.remove(f"events/{selected_item}.json")
+            self.step_back()
+        except:
+            pass
+        
+    def display_event(self):
+        selected_item = ""
+        try:
+            self.selected_item = self.list_of_events.get(self.list_of_events.curselection())
+            with open(f'events/{self.selected_item}.json') as f:
+                content = json.load(f)
+            new_root = Tk()
+            new_root.title(selected_item)
+            
+            self.menu_bar = Menu(new_root)
+            new_root.config(menu=self.menu_bar)
+            self.file_menu = Menu(self.menu_bar, tearoff=0)
+            self.menu_bar.add_cascade(label="File", menu=self.file_menu)
+            self.file_menu.add_command(label="Save", command=self.update_event)
+            self.menu_bar.config(font=("Arial", 26))
+            
+            self.display_content = ScrolledText(new_root)
+            self.display_content.insert(END, content)
+            self.display_content.grid(row=0, column=0, sticky=(N,S,E,W))
+            new_root.rowconfigure(0, weight=1)
+            new_root.columnconfigure(0, weight=1)
+            new_root.mainloop()
+        except:
+            pass
+        
+    def update_event(self):
+        content=self.display_content.get(1.0, END)
+        with open(f'events/{self.selected_item}.json', 'w') as f:
+            json.dump(content, f)
+        pass
+    
     def create_event(self):
         self.clear_scr()
         self.event_name_lbl = ttk.Label(self.subframe, text="Event Name", width=20)
@@ -804,7 +853,8 @@ class Events_Page(Home_Page):
                     events_list = json.load(f)
             except:
                 pass
-            events_list.append(self.get_event_name.get())
+            if self.get_event_name.get not in events_list:
+                events_list.append(self.get_event_name.get())
             with open("events/event_names.json", 'w') as f:
                 json.dump(events_list, f)
             with open(f"events/{self.get_event_name.get()}.json", 'w') as f:
@@ -813,19 +863,6 @@ class Events_Page(Home_Page):
         
     def paste_text(self,event):
         event.widget.insert(INSERT, root.clipboard_get())
-        
-    def display_event(self, event):
-        selected_item = event.widget.get(event.widget.curselection())
-        with open(f'events/{selected_item}.json') as f:
-            content = json.load(f)
-        new_root = Tk()
-        new_root.title(selected_item)
-        display_content = ScrolledText(new_root)
-        display_content.insert(END, content)
-        display_content.grid(row=0, column=0, sticky=(N,S,E,W))
-        new_root.rowconfigure(0, weight=1)
-        new_root.columnconfigure(0, weight=1)
-        new_root.mainloop()
         
     def step_back(self, *args):
         self.clear_scr()
