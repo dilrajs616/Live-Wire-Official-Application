@@ -1,0 +1,6 @@
+		Heirarchy Page
+
+1. It shows the heirarchy of club members.
+2. You can "Add" or "Remove" members using Edit button.
+3. Multiple members can be added at the same time.
+4. But ony one member can be removed at a time.

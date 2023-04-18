@@ -1,0 +1,11 @@
+                Events Page
+                
+1. It shows the list of events.
+2. Tap on the name of an event from the list 
+   and then choose the option to open/delete 
+   the event details.
+3. You can also create a new event using the 
+   "Create New Event" button.
+4. To update event details, just open the 
+   pre-existing event details and choose save 
+   option from menu_bar after doing the desired changes.

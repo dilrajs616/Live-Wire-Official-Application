@@ -75,7 +75,10 @@ class Home_Page:
         Images_Page(root)
         
     def how_to_use(self):
-        with open('documents/how_to_use.txt') as f:
+        with open('documents/heirarchy.txt') as f:
+            content = f.read()
+        messagebox.showinfo("How to use", content)
+        with open('documents/events.txt') as f:
             content = f.read()
         messagebox.showinfo("How to use", content)
         
