@@ -287,16 +287,21 @@ class Heirarchy_Page(Home_Page):
         head_lbl.grid(row=1, column=0, padx=10, pady=5, sticky=N)
         with open(f"live_wire_team/{team_files[index]}") as f:
             team_members = json.load(f)
-        names_list_txt = ScrolledText(self.subframe , width=35, height=10, background='white')
+        names_list_txt = Listbox(self.subframe , width=48, height=10, background='white')
         names_list_txt.grid(row=1, column=1, padx=10, pady=5)
         for index,member in enumerate(team_members):
             names_list_txt.insert(END, str(index+1) + ". " + member + "\n")
+            if index%2==0:
+                names_list_txt.itemconfigure(index, background='#f0f0ff')
         self.step_back_btn = ttk.Button(self.subframe, text = "Back", command = self.show_teams)
-        self.step_back_btn.grid(row=2, pady=10)
-        self.add_team_btn = ttk.Button(self.subframe, text='Add', command=lambda: self.add_team(temp))
-        self.add_team_btn.grid(row=2, column=1, sticky=E, padx=20)
+        self.step_back_btn.grid(row=2, pady=10, padx=30, sticky=W)
         self.remove_team_btn = ttk.Button(self.subframe, text='Remove', command=lambda: self.remove_team(temp))
         self.remove_team_btn.grid(row=2, column=1, sticky=W, padx=20)
+        self.add_team_btn = ttk.Button(self.subframe, text='Add', command=lambda: self.add_team(temp))
+        self.add_team_btn.grid(row=2, column=1, sticky=E, padx=20)
+        self.clear_content_btn = ttk.Button(self.subframe, text='Clear Team Data',
+                                            command=lambda: self.clear_team_content(temp, team_files[temp]))
+        self.clear_content_btn.grid(row=3, column=1, sticky=W, padx=20, pady=10)
         root.bind("<Escape>", self.show_teams)
     
     def add_team(self, index, *args):
@@ -382,6 +387,13 @@ class Heirarchy_Page(Home_Page):
             else:
                 self.display_msg.configure(text="Data not found in list")
             team_space.delete(0, END)
+        
+    def clear_team_content(self, index, file_name, *args):
+        team = []
+        with open(f"live_wire_team/{file_name}", 'w') as f:
+            json.dump(team, f)
+            self.clear_content_btn.configure(text="DONE")
+        self.show_team_member_list(index)
         
     def step_back(self, *args):
         self.clear_scr()
