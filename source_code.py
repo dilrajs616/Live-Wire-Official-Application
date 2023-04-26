@@ -443,31 +443,25 @@ class Events_Page(Home_Page):
             pass
         
     def display_event(self):
-        selected_item = ""
         try:
             self.selected_item = self.list_of_events.get(self.list_of_events.curselection())
             with open(f'events/{self.selected_item}.json') as f:
                 content = json.load(f)
             new_root = Tk()
-            new_root.title(selected_item)
-            
-            self.menu_bar = Menu(new_root)
-            new_root.config(menu=self.menu_bar)
-            self.file_menu = Menu(self.menu_bar, tearoff=0)
-            self.menu_bar.add_cascade(label="File", menu=self.file_menu)
-            self.file_menu.add_command(label="Save", command=self.update_event)
-            self.menu_bar.config(font=("Arial", 26))
-            
+            new_root.title(self.selected_item)
             self.display_content = ScrolledText(new_root)
             self.display_content.insert(END, content)
             self.display_content.grid(row=0, column=0, sticky=(N,S,E,W))
             new_root.rowconfigure(0, weight=1)
             new_root.columnconfigure(0, weight=1)
+            self.display_content.bind("<Control-s>", self.update_event)
+            self.display_content.focus()
+            new_root.attributes("-topmost", 1)
             new_root.mainloop()
         except:
             pass
         
-    def update_event(self):
+    def update_event(self, *args):
         content=self.display_content.get(1.0, END)
         with open(f'events/{self.selected_item}.json', 'w') as f:
             json.dump(content, f)
@@ -489,25 +483,18 @@ class Events_Page(Home_Page):
         self.go_back_btn.grid(row=2, column=0, padx=50, sticky=W)
         self.display_msg = ttk.Label(self.subframe, text="", font=("Helvetica", 16))
         self.display_msg.grid(column=1, sticky=W, pady=5, padx=40)
-        
+        self.get_event_details.bind("<Control-s>", self.save_event_data)
         root.bind("<Escape>", self.step_back)
         self.get_event_details.bind("<Control-v>", self.paste_text)
                 
-    def save_event_data(self):
+    def save_event_data(self, *args):
         events_list = []
-        if self.get_event_name.get() != "" and self.get_event_details.get(1.0, END) == "":
-            self.display_msg.configure(text="Enter event details first")
-                
-        if self.get_event_details.get(1.0, END) != "" and self.get_event_name.get() == "":
-            self.display_msg.configure(text="Enter event name first")
-            
-        if self.get_event_details.get(1.0, END) != "" and self.get_event_name.get() != "":
-            try:
-                with open("events/event_names.json") as f:
-                    events_list = json.load(f)
-            except:
-                pass
-            if self.get_event_name.get not in events_list:
+        if self.get_event_details.get(1.0, END).strip() == "" or self.get_event_name.get() == "":
+            self.display_msg.configure(text="Fill all fields")
+        if self.get_event_details.get(1.0, END).strip() != "" and self.get_event_name.get() != "":
+            with open("events/event_names.json") as f:
+                events_list = json.load(f)
+            if self.get_event_name.get().title() not in events_list:
                 events_list.append(self.get_event_name.get().title())
             with open("events/event_names.json", 'w') as f:
                 json.dump(events_list, f)
@@ -525,14 +512,10 @@ class Events_Page(Home_Page):
 class Images_Page(Home_Page):
     def __init__(self, root):
         super().__init__(root)
-        self.heirarchy_btn.destroy()
-        self.events_btn.destroy()
-        self.images_btn.destroy()
+        self.clear_scr()
         ttk.Label(self.subframe, text="This Page is Empty").grid(padx=200)
         self.go_back_btn = ttk.Button(self.subframe, text = "Back", command = self.go_back)
         self.go_back_btn.grid(pady=10)
-        self.quit_btn.grid_remove()
-        self.use_btn.grid_remove()
         
     def go_back(self, *args):
         self.subframe.grid_remove()
